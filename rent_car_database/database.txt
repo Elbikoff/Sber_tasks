@@ -1,0 +1,290 @@
+--3
+create table cars (
+    car_id int primary key
+    , brand varchar(50) not null
+    , model varchar(100) not null
+    , color varchar(20)
+    , year int
+    , rent_price decimal(10,2) not null
+);
+
+create table clients (
+    client_id int primary key
+    , name varchar(50) not null
+    , email varchar(40) not null
+    , phone int
+);
+
+create table orders (
+    order_id int primary key
+    , car_id int
+    , client_id int
+    , order_date date
+    , return_date date
+    , CONSTRAINT fk_car 
+            FOREIGN KEY (car_id) REFERENCES cars(car_id)
+    , CONSTRAINT fk_client 
+            FOREIGN KEY (client_id) REFERENCES clients(client_id)
+);
+
+--4a наполнение бд
+INSERT INTO cars 
+        VALUES (1, 'Toyota', 'Camry', 'White', 2020, 10000);
+INSERT INTO cars 
+        VALUES (2, 'Honda', 'Civic', 'Blue', 2021, 9500);
+INSERT INTO cars 
+        VALUES (3, 'BMW', '340i', 'Black', 2019, 13000);
+INSERT INTO cars 
+        VALUES (4, 'Kia', 'Ceed', 'White', 2008, 6700);
+INSERT INTO cars 
+        VALUES (5, 'Nissan', '180SX', 'Red', 1995, 8900);
+INSERT INTO cars 
+        VALUES (6, 'Honda', 'CRV', 'Gray', 2022, 9000);
+INSERT INTO cars 
+        VALUES (7, 'Toyota', 'RAV4', 'Silver', 2021, 8000);
+INSERT INTO cars 
+        VALUES (8, 'Ford', 'Explorer', 'White', 2020, 11000);
+INSERT INTO cars 
+        VALUES (9, 'Chevrolet', 'Aveo', 'Blue', 2015, 7500);
+INSERT INTO cars 
+        VALUES (10, 'Nissan', 'Maxima', 'Green', 2005, 6000);
+INSERT INTO cars 
+        VALUES (11, 'Honda', 'Accord', 'Silver', 2007, 5450);
+
+INSERT INTO clients 
+        VALUES (1, 'John Doe', 'john.doe@example.com', 125551234567);
+INSERT INTO clients 
+        VALUES (2, 'Jane Smith', 'jane.smith@gmail.com', 125559876543);
+INSERT INTO clients 
+        VALUES (3, 'Mike Jones', 'mike.jones@hotmail.com', 125555551212);
+INSERT INTO clients 
+        VALUES (4, 'Emily Wilson', 'emily.wilson@yahoo.com', 125558675309);
+INSERT INTO clients 
+        VALUES (5, 'Chris Martin', 'chris.martin@outlook.com', 125558889999);
+INSERT INTO clients 
+        VALUES (6, 'Lisa White', 'lisa.white@gmail.com', 125554443333);
+INSERT INTO clients 
+        VALUES (7, 'Alex Carter', 'alex.carter@yahoo.com', 125557772222);
+
+INSERT INTO orders
+        VALUES(1, 3, 4, TO_DATE('2023-01-15', 'YYYY-MM-DD'), TO_DATE('2023-03-05', 'YYYY-MM-DD'));
+INSERT INTO orders
+        VALUES(2, 6, 1, TO_DATE('2023-02-01', 'YYYY-MM-DD'), TO_DATE('2023-05-20', 'YYYY-MM-DD'));
+INSERT INTO orders
+        VALUES(3, 2, 6, TO_DATE('2023-03-10', 'YYYY-MM-DD'), TO_DATE('2023-03-12', 'YYYY-MM-DD'));
+INSERT INTO orders
+        VALUES(4, 5, 2, TO_DATE('2023-04-05', 'YYYY-MM-DD'), TO_DATE('2023-10-25', 'YYYY-MM-DD'));
+INSERT INTO orders
+        VALUES(5, 8, 2, TO_DATE('2023-05-12', 'YYYY-MM-DD'), TO_DATE('2023-06-01', 'YYYY-MM-DD'));
+insert into orders 
+        values (6, 2, 6, to_date('2023-03-15', 'yyyy-mm-dd'), to_date('2023-03-28', 'yyyy-mm-dd'));
+insert into orders
+        values (7, 3, 3, to_date('2023-12-07', 'yyyy-mm-dd'), to_date('2023-12-15', 'yyyy-mm-dd'));
+
+--4b CRUD операции
+select *
+from cars;
+select *
+from clients;
+select *
+from orders;
+
+--удалить строку второго клиента
+delete from orders
+where client_id = 2;
+
+--изменить id авто на 1 у четвертого клиента 
+update orders
+set car_id = 1
+where client_id = 4;
+
+--изменить данные о клиенте с id 1
+update clients
+set name = 'Ochir Elbikov'
+    , email = 'o.elbikov@gmail.com'
+    , phone = 79955522531 
+where client_id = 1;
+
+--создание таблицы с историями заказов
+create table orders_history (
+    history_id int primary key
+    , order_id int references orders(order_id)
+    , status varchar(50)
+    , change_date date
+);
+
+-- 4c - сохранение истории изменения заказов
+insert into orders_history 
+        values (3, 3, 'Booked', TO_DATE('2023-03-01', 'YYYY-MM-DD'));
+
+-- 4d - отчет об истории изменения заказов (создание представления для удобства)
+create or replace view view_d as 
+select o.car_id
+        , o.client_id
+        , o.order_date
+        , o.return_date
+        , history_id
+        , status
+        , change_date
+from orders_history oh
+join orders o 
+        on oh.order_id = o.order_id
+order by oh.change_date;
+
+select *
+from view_d;
+
+--4e сохранение истории сдачи авто 
+create table rent_history (
+        rent_id int primary key
+        , order_id int references orders(order_id)
+        , status varchar(50)
+        , return_date date
+        , change_date date
+);
+
+insert into rent_history
+        values (1, 1, 'Booked', to_date('2022-01-01', 'YYYY-MM-DD'), to_date('2022-04-01', 'YYYY-MM-DD'));
+insert into rent_history
+        values (2, 2, 'Booked', to_date('2022-06-13', 'YYYY-MM-DD'), to_date('2022-06-23', 'YYYY-MM-DD'));
+
+
+--4f отчет об истории сдачи в аренду авто
+create or replace view view_f as
+select o.car_id
+        , o.order_id
+        , o.client_id
+        , o.order_date
+        , o.return_date
+        , rh.rent_id
+        , rh.status
+        , rh.change_date
+from rent_history rh
+join orders o 
+        on rh.order_id = o.order_id
+order by rh.change_date; 
+
+select * 
+from view_f;
+
+-- проверка правильности данных
+select car_id
+        , client_id
+from orders
+where order_id = 2;
+
+--4g отчет о финансовой деятельности сервиса за период 
+create or replace view view_g as 
+select brand
+        , model
+        , rent_price
+        , o.*
+        , (to_date('2023-09-01', 'yyyy-mm-dd')-to_date('2023-08-01', 'yyyy-mm-dd')) as interval
+        , (to_date('2023-09-01', 'yyyy-mm-dd')-to_date('2023-08-01', 'yyyy-mm-dd'))*rent_price as total
+from orders o
+join cars c 
+        on c.car_id = o.car_id
+    where   to_date('2023-08-01', 'yyyy-mm-dd') >= order_date and 
+            to_date('2023-09-01', 'yyyy-mm-dd') <= return_date;
+
+select *
+from view_g;
+
+insert into orders 
+        values (6, 2, 6, to_date('2023-03-15', 'yyyy-mm-dd'), to_date('2023-03-28', 'yyyy-mm-dd'));
+
+select * 
+from orders_history;
+
+--4h Отчет о клиентах: когда какие авто брал в аренду, сколько заплатил и т.д.
+create or replace view view_h as
+select cl.client_id
+        , name
+        , ca.car_id
+        , order_date
+        , brand
+        , model
+        , (return_date - order_date) * rent_price AS total
+        , (return_date - order_date) as rent_days
+        , trunc(months_between(return_date, order_date)) as rent_month
+from clients cl
+join orders o 
+        on cl.client_id = o.client_id
+join cars ca 
+        on o.car_id = ca.car_id
+where name = 'Ochir Elbikov';
+
+select *
+from view_h;
+
+--список авто, которые не были в аренде
+select count(c.car_id) as not_rent_cnt
+from cars c
+left join orders o 
+        on c.car_id = o.car_id
+where client_id is null
+order by c.car_id;
+
+select distinct car_id
+        , count(car_id)
+from orders
+group by car_id
+order by car_id;
+
+-- количество авто в аренде
+select 
+    count(*) as cars_in_rent
+from orders
+where return_date is null or
+      return_date > current_timestamp;
+
+--4i Отчет о текущем состоянии автопарка (1 версия)
+select    cars_in_rent
+        , (total - cars_in_rent) as in_stock
+        , total
+from (
+    select 
+        count(*) as cars_in_rent
+        , (select count(*) from cars) as total
+        , c.car_id
+    from 
+        orders o
+    join cars c 
+            on o.car_id = c.car_id
+    where 
+        o.return_date is null or
+        o.return_date > current_timestamp
+    group by c.car_id
+);
+
+--4i Отчет о текущем состоянии автопаркa(2 версия)
+select 
+    count(*) as cars_in_rent
+    , (select count(*) 
+        from cars)-
+        (select count(car_id)
+        from orders
+        where return_date is null or
+              return_date > current_timestamp) as in_stock
+    , client_id
+from orders 
+where return_date is null or
+      return_date > current_timestamp
+group by client_id;
+
+--j подбор(поиск) авто по параметрам
+-- найти авто с ценой меньше 7 тысяч в сутки и год не меньше 2005
+select *
+from cars
+where  rent_price < 7000 and
+       year > 2005; 
+
+-- total, какие машины заработали всего денег на аренде
+select c.*
+        , order_date
+        , return_date
+        , (EXTRACT(DAY FROM ((return_date-order_date) DAY TO SECOND))*rent_price) as total
+from cars c
+join orders o 
+    on c.car_id = o.car_id
+order by total desc;

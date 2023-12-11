@@ -1,0 +1,35 @@
+Вторая часть ТЗ
+4 пункт
+    a)	Создание файла в директории с помощью сенсорной команды (‘touch file1.txt’)
+    b)	Создание файлов в директории с помощью сенсорной команды (‘touch file2.txt’)
+    c)	Изменение времени модификации (‘touch -m -a -t 199001010000.00 file2.txt’)
+    d)	Права доступа file2.txt rwxrw---- (‘chmod 760 file2.txt’) 
+          7 – rwx (чтение, запись, выполнение) права владельца
+          6 – rw- (чтение, запись) права группы
+          0 – ---- (никаких прав) права для остальных
+          Проверить права доступа с помощью команды ls -l file2.txt
+    e)	Создание директории (‘mkdir -p dir1/dir2/dir3’) 
+    -p позволяет создавать вложенные директории, даже если их родительские директории еще не существуют
+    f)	Установка прав доступа директории (‘chmod 760 dir1/dir2/dir3’)
+    g)	Копия файла file1.txt в dir3
+    h)	Перемещение файла file2.txt в dir3
+    i)	тип каталога dir1 – directory (‘file dir1’)
+    j)	Посчитать секунды с 1 января 1970 (эпохи Unix) (‘date +%s’) 1702200545
+        Удаление файлов и каталогов (‘rm -r *’), либо (‘rm -r dir1’ и после ‘rm -r file1.txt’)
+5 пункт
+    a)	Создание каталога public ('mkdir public’) открыть (‘cd public’) закрыть (‘cd -’)
+    b)	Создание каталога private ('mkdir private’) открыть (‘cd private’) закрыть (‘cd -’)
+    c)	Создание скрытого каталога в private (‘mkdir private/.hide’), чтобы увидеть его (‘cd -a private’)
+    d)	Создание каталога в public (“mkdir public/’New folder’”)
+    e)	Создание каталога New folder (из предыдущего шага) файл file.txt (touch public/’New folder’/file.txt)
+    f)	Создание мягкой ссылки (‘ln -s file.txt public/’New folder’/soft-link-file.txt’)
+    g)	Удаление всех созданных директорий (‘rm -r *’)
+6 пункт
+    a)	‘sudo free -h’
+    b)	‘sudo apt install net-tools’ -> ‘netstat -t’ или ‘ss -t’ – отображают tcp порты
+    c)	‘ss -tuln’
+    d)	‘mkdir dir’
+    e)	Для создания 99 директорий (‘mkdir dir/sub_dir{001..099}’)
+Чтобы замерить необходимо (‘time mkdir dir/sub_dir{001..099}’) real – 0.005s user 0.000s sys – 0.005s
+f)	(‘du -ah dir’) – равен 400 килобайтам.
+g)	rm -r *
